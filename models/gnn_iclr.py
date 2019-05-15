@@ -272,7 +272,7 @@ class GNN_active(nn.Module):
             x_active = x_active.detach()
         else:
             if self.training:
-                decision = torch.multinomial(x_active)
+                decision = torch.multinomial(x_active, 1)
             else:
                 _, decision = torch.max(x_active, 1)
                 decision = decision.unsqueeze(-1)

@@ -188,8 +188,8 @@ def train():
                                                  test_samples=test_samples*5, partition='val')
             test_acc_aux = test.test_one_shot(args, model=[enc_nn, metric_nn, softmax_module],
                                               test_samples=test_samples*5, partition='test')
-            test.test_one_shot(args, model=[enc_nn, metric_nn, softmax_module],
-                               test_samples=test_samples, partition='train')
+            #test.test_one_shot(args, model=[enc_nn, metric_nn, softmax_module],
+            #                   test_samples=test_samples, partition='train')
             enc_nn.train()
             metric_nn.train()
 
