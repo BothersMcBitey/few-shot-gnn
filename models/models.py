@@ -9,7 +9,7 @@ class EmbeddingCustom(nn.Module):
     ''' In this network the input image is supposed to be 28x28 '''
 
     def __init__(self, args, emb_size):
-        super(EmbeddingOmniglot, self).__init__()
+        super().__init__()
         self.emb_size = emb_size
         self.nef = 64
         self.args = args
