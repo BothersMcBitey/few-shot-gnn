@@ -11,7 +11,7 @@ class EmbeddingCustom(nn.Module):
     def __init__(self, args, emb_size):
         super().__init__()
         self.emb_size = emb_size
-        self.nef = 64
+        self.nef = 32
         self.args = args
         numblocks = 2
         
@@ -19,13 +19,13 @@ class EmbeddingCustom(nn.Module):
         
         self.norm = nn.BatchNorm2d(in_channels)
         
-        self.conv1s = nn.ModuleList([nn.Conv2d(in_channels if i == 0 else self.nef*(i+3)+in_channels, self.nef*(i+1), (1,1)) for i in range(0,numblocks)])
+        self.conv1s = nn.ModuleList([nn.Conv2d(in_channels if i == 0 else self.nef*(i+1)+in_channels, self.nef*(i+1), (1,1)) for i in range(0,numblocks)])
         self.conv2s = nn.ModuleList([nn.Conv2d(self.nef*(i+1), self.nef*(i+1), (3,3), padding=1) for i in range(0,numblocks)])
-        self.conv3s = nn.ModuleList([nn.Conv2d(self.nef*(i+1), self.nef*(i+4), (1,1)) for i in range(0,numblocks)])
+        self.conv3s = nn.ModuleList([nn.Conv2d(self.nef*(i+1), self.nef*(i+2), (1,1)) for i in range(0,numblocks)])
         
         self.convres = nn.ModuleList([nn.Conv2d(in_channels, in_channels, (2,2), stride=2) for i in range(0,numblocks)])
         
-        self.fc = nn.Linear(self.nef * (numblocks+3)+in_channels, self.emb_size)
+        self.fc = nn.Linear(self.nef * (numblocks+1)+in_channels, self.emb_size)
                 
     def forward(self, inputs):
         x = self.norm(inputs)
