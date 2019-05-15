@@ -25,7 +25,7 @@ class EmbeddingCustom(nn.Module):
         
         self.convres = nn.ModuleList([nn.Conv2d(in_channels, in_channels, (2,2), stride=2) for i in range(0,numblocks)])
         
-        self.fc = nn.Linear(self.nef * (numblocks+1)+in_channels, self.emb_size)
+        self.fc = nn.Linear(self.nef * (numblocks+3)+in_channels, self.emb_size)
                 
     def forward(self, inputs):
         x = self.norm(inputs)
@@ -36,11 +36,11 @@ class EmbeddingCustom(nn.Module):
             res = cr(res)
             x = torch.cat([out, res], dim=1)
         
-        print(out.size())
-        out = F.avg_pool2d(x, x.size()[2])
-        print(out.size())
+        #print(x.size())
+        out = (F.avg_pool2d(x, x.size()[2])).squeeze()
+        #print(out.size())
         out = self.fc(out)
-        return F.relu(out)
+        return [None, F.relu(out)]
         
 
 class EmbeddingOmniglot(nn.Module):
