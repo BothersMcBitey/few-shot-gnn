@@ -19,13 +19,13 @@ class EmbeddingCustom(nn.Module):
         
         self.norm = nn.BatchNorm2d(in_channels)
         
-        self.conv1s = nn.ModuleList([nn.Conv2d(in_channels if i == 0 else self.nef*(i+3)+1, self.nef*(i+1), (1,1)) for i in range(0,numblocks)])
+        self.conv1s = nn.ModuleList([nn.Conv2d(in_channels if i == 0 else self.nef*(i+3)+in_channels, self.nef*(i+1), (1,1)) for i in range(0,numblocks)])
         self.conv2s = nn.ModuleList([nn.Conv2d(self.nef*(i+1), self.nef*(i+1), (3,3), padding=1) for i in range(0,numblocks)])
         self.conv3s = nn.ModuleList([nn.Conv2d(self.nef*(i+1), self.nef*(i+4), (1,1)) for i in range(0,numblocks)])
         
         self.convres = nn.ModuleList([nn.Conv2d(in_channels, in_channels, (2,2), stride=2) for i in range(0,numblocks)])
         
-        self.fc = nn.Linear(self.nef * (numblocks+1)+1, self.emb_size)
+        self.fc = nn.Linear(self.nef * (numblocks+1)+in_channels, self.emb_size)
                 
     def forward(self, inputs):
         x = self.norm(inputs)
@@ -36,7 +36,9 @@ class EmbeddingCustom(nn.Module):
             res = cr(res)
             x = torch.cat([out, res], dim=1)
         
+        print(out.size())
         out = F.avg_pool2d(x, x.size()[2])
+        print(out.size())
         out = self.fc(out)
         return F.relu(out)
         
