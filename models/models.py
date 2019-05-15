@@ -10,10 +10,36 @@ class EmbeddingCustom(nn.Module):
 
     def __init__(self, args, emb_size):
         super(EmbeddingOmniglot, self).__init__()
-        pass
-
+        self.emb_size = emb_size
+        self.nef = 64
+        self.args = args
+		numblocks = 2
+		
+		in_channels = 1 if 'omniglot' == args.dataset else 3
+		
+		self.norm = nn.BatchNorm2d(in_channels)
+		
+		self.conv1s = nn.ModuleList([nn.Conv2d(in_channels if i == 0 else self.nef*(i)+1, self.nef*(i+1), (1,1)) for i in range(0,numblocks)])
+		self.conv2s = nn.ModuleList([nn.Conv2d(self.nef*(i+1), self.nef*(i+1), (3,3), padding=1) for i in range(0,numblocks)])
+		self.conv3s = nn.ModuleList([nn.Conv2d(self.nef*(i+1), self.nef*(i+2), (1,1)) for i in range(0,numblocks)])
+		
+		self.convres = nn.ModuleList([nn.Conv2d(in_channels, in_channels, (2,2), stride=2) for i in range(0,numblocks)])
+		
+		self.fc = nn.Linear(self.nef * (numblocks+1)+1, self.emb_size)
+				
     def forward(self, inputs):
-        pass
+        x = self.norm(inputs)
+		res = x
+		
+		for c1, c2, c3, cr in zip(self.conv1s, self.conv2s, self.conv3s, self.convres):
+			out = F.max_pool2d(F.relu(c3(F.relu(c2(F.relu(c1(x)))))), 2)
+			res = cr(res)
+			x = torch.cat([out, res], dim=1)
+		
+		out = F.avg_pool2d(x, x.size()[2])
+		out = self.fc(out)
+		return F.relu(out)
+		
 
 class EmbeddingOmniglot(nn.Module):
     ''' In this network the input image is supposed to be 28x28 '''
@@ -233,9 +259,9 @@ def create_models(args):
     print (args.dataset)
 
     if 'omniglot' == args.dataset:
-        enc_nn = EmbeddingImagenet(args, 128) if False else EmbeddingOmniglot(args, 64)
+        enc_nn = EmbeddingImagenet(args, 128) if False else EmbeddingOmniglot(args, 64) if False else EmbeddingCustom(args,64)
     elif 'mini_imagenet' == args.dataset:
-        enc_nn = EmbeddingImagenet(args, 128) if False else EmbeddingOmniglot(args, 64)
+        enc_nn = EmbeddingImagenet(args, 128) if False else EmbeddingOmniglot(args, 64) if False else EmbeddingCustom(args,64)
     else:
         raise NameError('Dataset ' + args.dataset + ' not knows')
     return enc_nn, MetricNN(args, emb_size=enc_nn.emb_size)
