@@ -261,9 +261,9 @@ def create_models(args):
     print (args.dataset)
 
     if 'omniglot' == args.dataset:
-        enc_nn = EmbeddingImagenet(args, 128) if False else EmbeddingOmniglot(args, 64) if False else EmbeddingCustom(args,64)
+        enc_nn = EmbeddingImagenet(args, 128) if False else EmbeddingOmniglot(args, 64) if True else EmbeddingCustom(args,64)
     elif 'mini_imagenet' == args.dataset:
-        enc_nn = EmbeddingImagenet(args, 128) if False else EmbeddingOmniglot(args, 64) if False else EmbeddingCustom(args,64)
+        enc_nn = EmbeddingImagenet(args, 128) if True else EmbeddingOmniglot(args, 64) if False else EmbeddingCustom(args,64)
     else:
         raise NameError('Dataset ' + args.dataset + ' not knows')
     return enc_nn, MetricNN(args, emb_size=enc_nn.emb_size)
