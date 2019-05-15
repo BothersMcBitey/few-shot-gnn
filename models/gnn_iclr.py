@@ -2,6 +2,7 @@
 # -*- coding: UTF-8 -*-
 
 # Pytorch requirements
+import time 
 import torch
 import torch.nn as nn
 from torch.autograd import Variable
@@ -265,10 +266,11 @@ class GNN_active(nn.Module):
         x_active = F.softmax(x_active)
         x_active = x_active*hidden_labels
 
+        print(x_active.size())
         if self.args.active_random == 1:
             #print('random active')
             x_active.data.fill_(1./x_active.size(1))
-            decision = torch.multinomial(x_active)
+            decision = torch.multinomial(x_active, 1)
             x_active = x_active.detach()
         else:
             if self.training:
@@ -281,6 +283,8 @@ class GNN_active(nn.Module):
 
         mapping = torch.FloatTensor(decision.size(0),x_active.size(1)).zero_()
         mapping = Variable(mapping)
+        print(mapping.size())
+        time.sleep(10000)
         if self.args.cuda:
             mapping = mapping.cuda()
         mapping.scatter_(1, decision, 1)
